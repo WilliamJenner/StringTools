@@ -1,35 +1,71 @@
 ﻿@page "/"
+@using System.Net.Mime
+@using System.Text
+@inject IJSRuntime JSRuntime
 
 <div class="container">
 
-    <div class="input-group">
-        <label>List of items to be copied</label>
-        <textarea class="form-control" id="exampleFormControlTextarea1"></textarea>
-    </div>
-
-    <div class="input-group">
-        <label>Format string</label>
-
-        <input type="text" class="form-control"  @bind="inputValue" @bind:event="oninput" />
-    </div>
-
-    <div class="row">
-        <label>Values for formatting</label>
-        <div class="col">
-            <input type="text" class="form-control" placeholder="First name">
+    @if (!string.IsNullOrEmpty(alertMessage))
+    {
+        <div class="alert alert-dark" role="alert">
+            @alertMessage
         </div>
-        <div class="col">
-            <input type="text" class="form-control" placeholder="Last name">
-        </div>
-    </div>
+    }
 
-    <div class="alert alert-dark" role="alert">
-        Results of format
-    </div>
+    <label for="exampleFormControlTextarea1">List of original strings</label>
+    <textarea class="form-control" id="exampleFormControlTextarea1" @bind="inputStrings" @bind:event="oninput"></textarea>
+
+    <label for="formatString">Format string</label>
+    <input type="text" class="form-control" id="formatString" @bind="formatString" @bind:event="oninput" />
+
+    <button type="button" class="btn btn-primary" @onclick="GenerateStrings">Generate</button>
+
+    @if (formattedStrings.Count > 0)
+    {
+        <div class="alert alert-dark" role="alert">
+            <ul class="list-group">
+                @foreach (var formatString in formattedStrings)
+                {
+                    <li class="list-group-item">@formatString</li>
+                }
+            </ul>
+            <button type="button" class="btn btn-primary" @onclick="CopyTextToClipboard">Copy</button>
+        </div>
+    }
+
+
 </div>
 
 @code {
-    private string inputValue = "HEY THERE";
+    private string formatString;
+    private string inputStrings;
+    private List<string> formattedStrings = new List<string>();
+    private string alertMessage;
+
+    private void GenerateStrings()
+    {
+        try
+        {
+            formattedStrings = FormattedStringFactory.FormatStrings(inputStrings, formatString);
+            
+            var sb = new StringBuilder();
+            formattedStrings.ForEach(str => sb.AppendLine(str));
+            Text = sb.ToString();
+            // If it's successful remove the alertMessage for next time
+            alertMessage = "";
+        }
+        catch (Exception ex)
+        {
+            alertMessage = ex.Message;
+        }
+    }
+
+    [Parameter] public string Text { get; set; }
+
+    private async Task CopyTextToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("clipboardCopy.copyText", Text);
+    }
 }
 
 
