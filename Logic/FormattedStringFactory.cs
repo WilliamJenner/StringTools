@@ -23,7 +23,13 @@ namespace Logic
             {
                 // Remove whitespace
                 str = str.Replace(" ", string.Empty);
-                return String.Format(formatString, str);
+
+                // perform our own formatting
+                var newFormatString = formatString
+                    .Replace(Constants.FORMAT_UPPER, str.ToUpper())
+                    .Replace(Constants.FORMAT_LOWER, str.ToLower());
+
+                return String.Format(newFormatString, str);
             }).ToList();
         }
     }

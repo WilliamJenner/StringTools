@@ -1,0 +1,39 @@
+﻿@using System.Runtime.InteropServices
+@using System.Runtime.Serialization
+<div>
+    <button @onclick="HandleButtonClick">@ButtonText</button>
+
+    <div hidden="@IsHidden">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">@HeaderText</h5>
+                @if (!string.IsNullOrEmpty(SubtitleText))
+                {
+                    <h6 class="card-subtitle mb-2 text-muted">@SubtitleText</h6>
+                }
+                <p class="card-text">@BodyText</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string ButtonText { get; set; }
+    [Parameter]
+    public string HeaderText { get; set; }
+    [Parameter]
+    public string? SubtitleText { get; set; }
+    [Parameter]
+    public string BodyText { get; set; }
+
+    private bool IsHidden = true;
+
+    private void HandleButtonClick()
+    {
+        IsHidden = !IsHidden;
+    }
+
+}

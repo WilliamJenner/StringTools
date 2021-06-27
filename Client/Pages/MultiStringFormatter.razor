@@ -1,11 +1,11 @@
 ﻿@page "/multistringformat"
 @using System.Text
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 
-    @if (!string.IsNullOrEmpty(alertMessage))
+    @if (!string.IsNullOrEmpty(_alertMessage))
     {
         <div class="alert alert-danger" role="alert">
-            @alertMessage
+            @_alertMessage
         </div>
     }
 
@@ -14,12 +14,30 @@
             <div class="alert alert-secondary h-100">
                 <div>
                     <label for="exampleFormControlTextarea1">List of original strings</label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" @bind="inputStrings" @bind:event="oninput"></textarea>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" @bind="_inputStrings" @bind:event="oninput"></textarea>
                 </div>
 
                 <div>
                     <label for="formatString">Format string</label>
-                    <input type="text" class="form-control" id="formatString" @bind="formatString" @bind:event="oninput"/>
+                    <div class=" alert alert-info">
+                        <p>Supported characters</p>
+                        <ul>
+                            <li>
+                                {0} - Represents an item from the input list
+                            </li>
+                            <li>
+                                {LOWER} - Represents {0}.ToLower()
+                            </li>
+                            <li>
+                                {UPPER} - Represents {0}.ToUpper()
+                            </li>
+                            <li>
+                                {{ get; }} - Represents { get; }
+                            </li>
+                            <li> {{ {UPPER} }} - Other supported characters can be surrounded by brackets</li>
+                        </ul>
+                    </div>
+                    <input type="text" class="form-control" id="formatString" @bind="_formatString" @bind:event="oninput"/>
                 </div>
 
                 <div class="mt-3">
@@ -29,7 +47,7 @@
         </div>
         <div class="col">
             <div class="alert alert-secondary h-100" role="alert">
-                @if (formattedStrings.Count > 0)
+                @if (_formattedStrings.Count > 0)
                 {
                     <div class="btn btn-primary mb-3" @onclick="CopyTextToClipboard">
                         <svg class="feather">
@@ -38,7 +56,7 @@
                     </div>
                     
                     <ul class="list-group">
-                        @foreach (var formatString in formattedStrings)
+                        @foreach (var formatString in _formattedStrings)
                         {
                             <li class="list-group-item">@formatString</li>
                         }
@@ -49,35 +67,33 @@
     </div>
 
 @code {
-    private string formatString;
-    private string inputStrings;
-    private List<string> formattedStrings = new List<string>();
-    private string alertMessage;
-
-    [Parameter]
-    public string resultString { get; set; }
+    private string _formatString;
+    private string _inputStrings;
+    private List<string> _formattedStrings = new List<string>();
+    private string _alertMessage;
+    private string _resultString { get; set; }
 
     private void GenerateStrings()
     {
         try
         {
-            formattedStrings = FormattedStringFactory.FormatStrings(inputStrings, formatString);
+            _formattedStrings = FormattedStringFactory.FormatStrings(_inputStrings, _formatString);
 
             var sb = new StringBuilder();
-            formattedStrings.ForEach(str => sb.AppendLine(str));
-            resultString = sb.ToString();
+            _formattedStrings.ForEach(str => sb.AppendLine(str));
+            _resultString = sb.ToString();
     // If it's successful remove the alertMessage for next time
-            alertMessage = "";
+            _alertMessage = "";
         }
         catch (Exception ex)
         {
-            alertMessage = ex.Message;
+            _alertMessage = ex.Message;
         }
     }
 
     private async Task CopyTextToClipboard()
     {
-        await JSRuntime.InvokeVoidAsync("clipboardCopy.copyText", resultString);
+        await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", _resultString);
     }
 
 }
