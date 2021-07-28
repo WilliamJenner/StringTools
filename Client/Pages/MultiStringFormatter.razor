@@ -2,10 +2,10 @@
 @using System.Text
 @inject IJSRuntime JsRuntime
 
-    @if (!string.IsNullOrEmpty(_alertMessage))
+    @if (!string.IsNullOrEmpty(AlertMessage))
     {
         <div class="alert alert-danger" role="alert">
-            @_alertMessage
+            @AlertMessage
         </div>
     }
 
@@ -14,7 +14,7 @@
             <div class="alert alert-secondary h-100">
                 <div>
                     <label for="exampleFormControlTextarea1">List of original strings</label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" @bind="_inputStrings" @bind:event="oninput"></textarea>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" @bind="InputString" @bind:event="oninput"></textarea>
                 </div>
 
                 <div>
@@ -37,7 +37,7 @@
                             <li> {{ {UPPER} }} - Other supported characters can be surrounded by brackets</li>
                         </ul>
                     </div>
-                    <input type="text" class="form-control" id="formatString" @bind="_formatString" @bind:event="oninput"/>
+                    <input type="text" class="form-control" id="formatString" @bind="FormatString" @bind:event="oninput"/>
                 </div>
 
                 <div class="mt-3">
@@ -47,7 +47,7 @@
         </div>
         <div class="col">
             <div class="alert alert-secondary h-100" role="alert">
-                @if (_formattedStrings.Count > 0)
+                @if (formattedStrings.Count > 0)
                 {
                     <div class="btn btn-primary mb-3" @onclick="CopyTextToClipboard">
                         <svg class="feather">
@@ -56,7 +56,7 @@
                     </div>
                     
                     <ul class="list-group">
-                        @foreach (var formatString in _formattedStrings)
+                        @foreach (var formatString in formattedStrings)
                         {
                             <li class="list-group-item">@formatString</li>
                         }
@@ -67,33 +67,38 @@
     </div>
 
 @code {
-    private string _formatString;
-    private string _inputStrings;
-    private List<string> _formattedStrings = new List<string>();
-    private string _alertMessage;
-    private string _resultString { get; set; }
+    private string FormatString;
+    private string InputString;
+    private List<string> formattedStrings = new List<string>();
+    private string AlertMessage;
+    private string ResultString { get; set; }
 
     private void GenerateStrings()
     {
         try
         {
-            _formattedStrings = FormattedStringFactory.FormatStrings(_inputStrings, _formatString);
+            if (string.IsNullOrEmpty(InputString))
+            {
+                throw new Exception("No input provided");
+            }
+
+            formattedStrings = FormattedStringFactory.FormatStrings(InputString, FormatString);
 
             var sb = new StringBuilder();
-            _formattedStrings.ForEach(str => sb.AppendLine(str));
-            _resultString = sb.ToString();
-    // If it's successful remove the alertMessage for next time
-            _alertMessage = "";
+            formattedStrings.ForEach(str => sb.AppendLine(str));
+            ResultString = sb.ToString();
+            // If it's successful remove the alertMessage for next time
+            AlertMessage = "";
         }
         catch (Exception ex)
         {
-            _alertMessage = ex.Message;
+            AlertMessage = ex.Message;
         }
     }
 
     private async Task CopyTextToClipboard()
     {
-        await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", _resultString);
+        await JsRuntime.InvokeVoidAsync("clipboardCopy", ResultString);
     }
 
 }

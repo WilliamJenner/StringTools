@@ -10,3 +10,4 @@ namespace Logic
         public static string FORMAT_LOWER => "{LOWER}";
     }
 }
+    

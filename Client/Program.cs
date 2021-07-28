@@ -13,14 +13,15 @@ namespace MassInsert
 {
     public class Program
     {
+#pragma warning disable AsyncFixer01 // Unnecessary async/await usage
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
             await builder.Build().RunAsync();
         }
+#pragma warning restore AsyncFixer01 // Unnecessary async/await usage
     }
 }

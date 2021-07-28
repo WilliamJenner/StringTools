@@ -1,0 +1,15 @@
+﻿@page "/camera"
+@using System.Text
+@inject IJSRuntime JsRuntime
+
+<div id="react-div"></div>
+
+<img style="-webkit-user-select: none;margin: auto;background-color: hsl(0, 0%, 25%);" src="http://192.168.1.123:8081/">
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await JsRuntime.InvokeVoidAsync("renderReactApp");
+    }
+}
